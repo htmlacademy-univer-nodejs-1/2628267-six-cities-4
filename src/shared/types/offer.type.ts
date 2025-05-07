@@ -1,25 +1,25 @@
-import { Amenity } from './amenity.type.js';
-import { ApartmentType } from './apartment-type.enum.js';
-import { Coordinates } from './coordinates.type.js';
-import { TownType } from './town-type.enum.js';
+import { City } from './city.enum.js';
+import { HousingType } from './houstingType.enum.js';
+import { Good } from './good.enum.js';
 import { User } from './user.type.js';
+
 
 export type Offer = {
   title: string;
   description: string;
-  date: Date;
-  town: TownType;
-  image: string;
-  gallery: string[];
+  postDate: Date;
+  city: City;
+  previewImage: string;
+  images: string[];
   isPremium: boolean;
   isFavorite: boolean;
   rating: number;
-  apartmentType: ApartmentType;
-  roomCount: number;
-  guestCount: number;
-  cost: number;
-  amenities: Amenity[];
-  author: User;
-  commentCount: number;
-  coordinates: Coordinates;
-};
+  type: HousingType;
+  bedrooms: number;
+  maxAdults: number;
+  price: number;
+  goods: Good[];
+  host: User;
+  countComments: number;
+  location: [number, number];
+}

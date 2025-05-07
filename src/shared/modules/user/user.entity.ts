@@ -1,44 +1,59 @@
-import {
-  defaultClasses,
-  getModelForClass,
-  modelOptions,
-  prop,
-} from '@typegoose/typegoose';
 import { User, UserType } from '../../types/index.js';
-import { createSHA256 } from '../../helpers/hash.js';
+import { defaultClasses, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+import { createSHA256 } from '../../helpers/index.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface UserEntity extends defaultClasses.Base {}
 
 @modelOptions({
   schemaOptions: {
-    collection: 'users',
-  },
+    collection: 'users'
+  }
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class UserEntity extends defaultClasses.TimeStamps implements User {
-  @prop({ unique: true, required: true })
-  public mail: string;
-
-  @prop({ required: false, default: '' })
-  public avatar: string;
-
-  @prop({ required: true, default: '' })
+  @prop({
+    required: true,
+    default: '',
+    type: () => String
+  })
   public name: string;
 
-  @prop({ required: true, default: '' })
-  private password?: string;
+  @prop({
+    unique: true,
+    required: true,
+    type: () => String
+  })
+  public email: string;
 
-  @prop({ required: true, default: UserType.Default })
+  @prop({
+    required: false,
+    default: '',
+    type: () => String
+  })
+  public avatarUrl: string;
+
+  @prop({
+    required: true,
+    type: () => String,
+    enum: UserType
+  })
   public type: UserType;
+
+  @prop({
+    required: true,
+    default: '',
+    type: () => String
+  })
+  private password?: string;
 
   constructor(userData: User) {
     super();
 
-    this.mail = userData.mail;
-    this.avatar = userData.avatar;
     this.name = userData.name;
+    this.email = userData.email;
+    this.avatarUrl = userData.avatarUrl;
     this.type = userData.type;
   }
 
@@ -48,6 +63,11 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
 
   public getPassword() {
     return this.password;
+  }
+
+  public verifyPassword(password: string, salt: string) {
+    const hashPassword = createSHA256(password, salt);
+    return hashPassword === this.password;
   }
 }
 
