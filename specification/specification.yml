@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: '3.0.2'
 info:
   title: API сервер для демо-проекта «Шесть городов».
   description: |-
@@ -7,762 +7,577 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
   version: 2.0.0
-
 tags:
+  - name: users
+    description: Действия с пользователем.
   - name: offers
-    description: Действия с объявлениями.
+    description: Действия с предложениями.
   - name: comments
     description: Действия с комментариями.
-  - name: users
-    description: Действия с пользователями.
+  - name: premium
+    description: Действия с премиальными предложениями.
+  - name: favorites
+    description: Действия с избранными предложениями.
+
+
 paths:
-  /comments:
-    post:
-      tags:
-        - comments
-      summary: Создать комментарий
-      description: Создание комментария
-
-      requestBody:
-        description: Информация для создания нового комментария.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createComment'
-        required: true
-
-      responses:
-        '201':
-          description: Новый комментарий создан.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/comment'
-
-  /comments/{offerId}:
-    get:
-      tags:
-        - comments
-      summary: Получить список комментариев
-      description: Получение списка комментариев по номеру предложения
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: string
-            example: 6329c3d6a04ab1061c6425eo
-          description: ID предложения, для которого запрашиваются комментарии
-
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            maximum: 50
-            example: 10
-          description: Количество комментариев для получения
-
-      responses:
-        '200':
-          description: Список комментариев
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/comment'
-
-  /users/register:
-    post:
-      tags:
-        - users
-      summary: Регистрация пользователя.
-      description: Регистрация нового пользователя.
-
-      requestBody:
-        description: Информация для создания нового пользователя.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createUser'
-        required: true
-
-      responses:
-        '201':
-          description: Пользователь зарегистрирован. Объект пользователя.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user'
-
-        '409':
-          description: Пользователь с таким mail уже существует
-  /users/login:
-    post:
-      tags:
-        - users
-      summary: Авторизация пользователя
-      description: Авторизует пользователя на основе логина и пароля
-    get:
-      tags:
-        - users
-      summary: Проверка состояния пользователя.
-      description: Возвращает информацию по авторизированном пользователю.
-
   /offers:
-    get:
+    post:
       tags:
         - offers
-      summary: Получить список предложений
-      description: Список предложений по аренде. По умолчанию возвращает до 60. Можно задать нужное количество через параметр запроса.
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            maximum: 60
-            example: 10
-          description: Количество предложений для возврата
+      summary: Создание нового предложения.
+      description: Возвращает информацию по созданию нового предложения.
+
+      requestBody:
+        description: Информация для создания нового предложения.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newOffer'
+        required: true
+
       responses:
-        '200':
-          description: Список предложений
+        "201":
+          description: Предложение создано.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/offerSummary'
-    post:
+                  $ref: '#/components/schemas/offer'
+        "409":
+          description: Некорректный запрос.
+
+    get:
       tags:
         - offers
-      summary: Создать предложение
-      description: Создание предложения
+      summary: Получение списка предложений по аренде.
+      description: Возвращает информацию о списке предложении по аренде.
 
-      requestBody:
-        description: Информация для создания предложения
+      responses:
+       "201":
+        description: OK
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/createOffer'
-        required: true
-
-      responses:
-        '200':
-          description: Предложение успешно создано
-          content:
-            application/json:
-              schema:
+              type: array
+              items:
                 $ref: '#/components/schemas/offer'
+       "409":
+        description: Некорректный запрос.
 
   /offers/{offerId}:
     get:
       tags:
         - offers
-      summary: Получить подробную информацию
-      description: Получение подробной информации
+      summary: Получение детальной информации о предложении.
+      description: Возвращает детальную информацию о предложении.
+
       parameters:
         - name: offerId
           in: path
           required: true
           schema:
             type: string
-            example: 6329c3d6a04ab1061c6425ef
-          description: Идентификатор предложения
 
       responses:
-        '200':
-          description: Предложение успешно найдено
+        "201":
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
-
-        '404':
-          description: Предложение не найдено
+        "409":
+          description: Некорректный запрос.
 
     patch:
       tags:
         - offers
-      summary: Изменить предложение
-      description: Изменение предложения
+      summary: Редактирование предложения.
+      description: Возвращает информацию о редактировании предложения.
+
       parameters:
         - name: offerId
           in: path
           required: true
           schema:
             type: string
-            example: 6329c3d6a04ab1061c6425ef
-          description: Идентификатор предложения
 
       requestBody:
-        description: Информация для редактирования предложения
+        description: Обновленное предложение.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateOffer'
+              $ref: '#/components/schemas/offer'
         required: true
 
       responses:
-        '200':
-          description: Предложение успешно обновлено
+        "201":
+          description: Предложение обновлено.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/offer'
-        '400':
-          description: Неверные данные
-        '404':
-          description: Предложение не найдено
+        "409":
+          description: Некорректный запрос.
 
     delete:
       tags:
         - offers
-      summary: Удалить предложение
-      description: Удаление предложения
+      summary: УУдаление предложения.
+      description: Возвращяет информацию об удалении предложения.
+
       parameters:
         - name: offerId
           in: path
           required: true
           schema:
             type: string
-            example: 6329c3d6a04ab1061c6425ef
-          description: Идентификатор предложения
-      responses:
-        '204':
-          description: Предложение успешно удалено
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/offer'
-        '404':
-          description: Предложение не найдено
 
-  /offers/{town}/premium:
+      responses:
+        "201":
+          description: Предложение успешно удалено.
+        "409":
+          description: Некорректный запрос.
+
+  /comments/{offerId}:
     get:
       tags:
-        - offers
-      summary: Получить премиальные предложения по городу
-      description: Список до 3 премиальных предложений в указанном городе
+        - comments
+      summary: Получение списка комментариев для предложения.
+      description: Возвращает информацию о состоянии списка комментариев для предложения.
 
       parameters:
-        - name: town
+        - name: offerId
           in: path
           required: true
           schema:
             type: string
-            enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-          description: Название города
 
       responses:
-        '200':
-          description: Список премиальных предложений
+        "201":
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/offerSummary'
-  /offers/favourites:
-    get:
-      tags:
-        - offers
-      summary: Получить избранные предложения
-      description: Список всех предложений, добавленных в избранное текущим пользователем
-      responses:
-        '200':
-          description: Список избранных предложений
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/offerSummary'
+                  $ref: '#/components/schemas/сomment'
+        "409":
+          description: Некорректный запрос
 
-  /offers/{offerId}/favorite:
     post:
       tags:
-        - offers
-      summary: Добавить предложение в избранное
-      description: Добавляет предложение в список избранных текущего пользователя
+        - comments
+      summary: Добавление комментария для предложения.
+      description: Возвращает информацию о добавлении нового комментария.
+
       parameters:
         - name: offerId
           in: path
           required: true
           schema:
             type: string
-          description: ID предложения
+
+      requestBody:
+        description: Новый комментарий.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/сommentAdd'
+        required: true
+
       responses:
-        '200':
-          description: Предложение добавлено в избранное
+        "201":
+          description: Комментарий добавлен.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/offerSummary'
+                $ref: '#/components/schemas/сomment'
+        "409":
+          description: Некорректный запрос.
+
+  /register:
+      post:
+        tags:
+          - users
+        summary: Создание нового пользователя.
+        description: Регистрирует нового пользователя.
+
+        requestBody:
+          description: Информация для создания нового пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createUser'
+          required: true
+
+        responses:
+          "201":
+            description: Пользователь зарегистрирован. Объект пользователя.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/user'
+          "409":
+            description: Некорректный запрос.
+
+  /login:
+    post:
+      tags:
+        - users
+      summary: Вход в закрытую часть приложения.
+      description: Авторизует пользователя на основе логина и пароля.
+
+      requestBody:
+        description: Информация для авторизация пользователя.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userAuthorization'
+        required: true
+
+      responses:
+        "201":
+          description: Пользователь авторизировался.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "409":
+          description: Некорректный запрос.
+
+    get:
+      tags:
+        - users
+      summary: Проверка состояния пользователя.
+      description: Возвращает информацию по авторизованному пользователю.
+
+      responses:
+        "201":
+          description: ОК
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "409":
+          description: Некорректный запрос.
+
+  /logout:
     delete:
       tags:
-        - offers
-      summary: Удалить предложение из избранного
-      description: Удаляет предложение из списка избранных текущего пользователя
+        - users
+      summary: Выход из закрытой части приложения.
+      description: Возвращает информацию по выходу пользователя.
+
+      responses:
+        "201":
+          description: Пользователь вышел из системы.
+        "409":
+          description: Некорректный запрос.
+
+  /premium?city={city}:
+    get:
+      tags:
+        - premium
+      summary: Получение списка премиальных предложений для города.
+      description: Возвращает список премиальных предложений для города.
+
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/offer'
+        "409":
+          description: Некорректный запрос.
+
+  /favorite:
+    get:
+      tags:
+        - favorites
+      summary: Получения списка предложений, добавленных в избранное.
+      description: Возвращает список предложений, добавленных в избранное.
+
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/offer'
+        "409":
+          description: Некорректный запрос
+
+  /favorite/{offerId}/{status}:
+    post:
+      tags:
+        - favorites
+      summary: Добавление предложения в избранное.
+      description: Добавляет предложение в избранное.
+
       parameters:
         - name: offerId
           in: path
           required: true
           schema:
             type: string
-          description: ID предложения
       responses:
-        '200':
-          description: Предложение удалено из избранного
+        "201":
+          description: Предложение добавлено в избранное.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+        "409":
+          description: Некорректный запрос.
+
+    delete:
+      tags:
+        - offers
+      summary: Удаление предложения из избранного.
+      description: Удаляет предложения из избранного.
+
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Предложение удалено из избранного.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+        "409":
+          description: Некорректный запрос.
 
 components:
   schemas:
-    createUser:
-      type: object
-      required: [mail, name, password, type]
-
+    offer:
+      description: offer schema
       properties:
-        mail:
+        id:
           type: string
-          example: keks@htmlacademy.ru
-
-        name:
+        price:
+          type: number
+        rating:
+          type: number
+        title:
           type: string
-          example: Keks
-
-        avatar:
-          type: [string, 'null']
-          example: https://gravatar.com/avatar/7cb23e9dcb44eeff5331a137414a0f1b?s=400&d=robohash&r=x
-
-        password:
+          minLength: 10
+          maxLength: 100
+        isPremium:
+          type: boolean
+        isFavorite:
+          type: boolean
+        city:
+          $ref: '#/components/schemas/city'
+        location:
+          $ref: '#/components/schemas/location'
+        previewImage:
           type: string
-          example: 123456
-
         type:
+          $ref: '#/components/schemas/offerType'
+        bedrooms:
+          type: number
+        description:
           type: string
-          enum: [обычный, pro]
-          example: обычный
+          minLength: 20
+          maxLength: 1024
+        goods:
+          type: array
+          items:
+            type: string
+        host:
+          $ref: '#/components/schemas/user'
+        images:
+          type: array
+          items:
+            type: string
+        maxAdults:
+          type: number
+
+    newOffer:
+      description: newOffer schema
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 100
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+        city:
+          $ref: '#/components/schemas/city'
+        previewImage:
+          type: string
+        isPremium:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/offerType'
+        bedrooms:
+          type: number
+        maxAdults:
+          type: number
+        price:
+          type: number
+        goods:
+          type: array
+          items:
+            type: string
+        location:
+          $ref: '#/components/schemas/location'
+        images:
+          type: array
+          items:
+            type: string
+
+    сomment:
+      description: comment schema
+      properties:
+        id:
+          type: string
+        comment:
+          type: string
+          minLength: 5
+          maxLength: 1024
+        date:
+          type: string
+        rating:
+          type: number
+        user:
+          $ref: '#/components/schemas/user'
+
+    сommentAdd:
+      description: сommentAdd scheme
+      properties:
+        comment:
+          type: string
+        rating:
+          type: number
 
     user:
-      type: object
-      required: [id, mail, name, type]
-
+      description: user schema
       properties:
-        id:
-          type: string
-          example: 6329c3d6a04ab1061c6425ea
-
-        mail:
-          type: string
-          example: keks@htmlacademy.ru
-
         name:
           type: string
-          example: Keks
-
+          minLength: 1
+          maxLength: 15
+          example: Dmitry
         avatar:
           type: string
-          example: https://gravatar.com/avatar/7cb23e9dcb44eeff5331a137414a0f1b?s=400&d=robohash&r=x
-
         type:
+          $ref: '#/components/schemas/userType'
+        email:
           type: string
-          enum: [обычный, pro]
-          example: обычный
+          pattern: ^\S@i.edu$
 
-    updateOffer:
-      type: object
-
+    createUser:
+      description: createUser schema
       properties:
-        title:
+        name:
           type: string
-          example: Modern Loft in Berlin
-
-        description:
+        password:
           type: string
-          example: Spacious loft with a great city view
-
-        image:
+          minLength: 6
+          maxLength: 12
+        type:
+          $ref: '#/components/schemas/userType'
+        email:
           type: string
-          example: image3.jpg
+          pattern: ^\S@i.edu$
 
-        date:
-          type: string
-          format: date
-          example: 2025-02-12
-
-        cost:
-          type: number
-          example: 180
-
-        town:
-          type: string
-          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-          example: Paris
-
-        gallery:
-          type: array
-          items:
-            type: string
-          example: [img5.jpg, img6.jpg]
-
-        isPremium:
-          type: boolean
-          example: true
-
-        isFavorite:
-          type: boolean
-          example: true
-
-        rating:
-          type: number
-          example: 4.5
-
-        apartmentType:
-          type: string
-          enum: [apartment, house, room, hotel]
-          example: apartment
-
-        roomCount:
-          type: integer
-          example: 4
-
-        guestCount:
-          type: integer
-          example: 4
-
-        amenities:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                Breakfast,
-                Air conditioning,
-                Laptop friendly workspace,
-                Baby seat,
-                Washer,
-                Towels,
-                Fridge,
-              ]
-            example: [Fridge, Breakfast, Washer]
-
-        userId:
-          type: string
-          example: 6329c3d6a04ab1061c6425ea
-
-    createOffer:
-      type: object
-      required:
-        [
-          title,
-          description,
-          image,
-          date,
-          cost,
-          town,
-          gallery,
-          isPremium,
-          isFavorite,
-          rating,
-          apartmentType,
-          roomCount,
-          guestCount,
-          amenities,
-          userId,
-        ]
-
+    userAuthorization:
+      description: userAuthorization schema
       properties:
-        title:
+        email:
           type: string
-          example: Modern Loft in Berlin
-
-        description:
+          pattern: ^\S@i.edu$
+        password:
           type: string
-          example: Spacious loft with a great city view
+          minLength: 6
+          maxLength: 12
 
-        image:
-          type: string
-          example: image3.jpg
-
-        date:
-          type: string
-          format: date
-          example: 2025-02-12
-
-        cost:
-          type: number
-          example: 180
-
-        town:
-          type: string
-          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-          example: Paris
-
-        gallery:
-          type: array
-          items:
-            type: string
-          example: [img5.jpg, img6.jpg]
-
-        isPremium:
-          type: boolean
-          example: true
-
-        isFavorite:
-          type: boolean
-          example: true
-
-        rating:
-          type: number
-          example: 4.5
-
-        apartmentType:
-          type: string
-          enum: [apartment, house, room, hotel]
-          example: apartment
-
-        roomCount:
-          type: integer
-          example: 4
-
-        guestCount:
-          type: integer
-          example: 4
-
-        amenities:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                Breakfast,
-                Air conditioning,
-                Laptop friendly workspace,
-                Baby seat,
-                Washer,
-                Towels,
-                Fridge,
-              ]
-            example: [Fridge, Breakfast, Washer]
-
-        userId:
-          type: string
-          example: 6329c3d6a04ab1061c6425ea
-
-    offerSummary:
-      type: object
-
+    userAuthorizationResponse:
+      description: user schema
       properties:
-        id:
+        name:
           type: string
-          example: 6329c3d6a04ab1061c6425eo
-
-        title:
+        avatar:
           type: string
-          example: Modern Loft in Berlin
-
-        cost:
-          type: number
-          example: 180
-
-        apartmentType:
+        type:
+          $ref: '#/components/schemas/userType'
+        email:
           type: string
-          enum: [apartment, house, room, hotel]
-          example: apartment
-
-        isFavorite:
-          type: boolean
-          example: true
-
-        date:
+          pattern: ^\S@i.edu$
+        token:
           type: string
-          format: date
-          example: 2025-02-12
 
-        town:
-          type: string
-          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-          example: Paris
-
-        image:
-          type: string
-          example: image3.jpg
-
-        isPremium:
-          type: boolean
-          example: true
-
-        rating:
-          type: number
-          example: 4.5
-
-        commentCount:
-          type: integer
-          example: 4
-
-        userId:
-          type: string
-          example: 6329c3d6a04ab1061c6425eu
-
-    offer:
-      type: object
-      required:
-        [
-          id,
-          title,
-          description,
-          image,
-          date,
-          cost,
-          town,
-          gallery,
-          isPremium,
-          isFavorite,
-          rating,
-          apartmentType,
-          roomCount,
-          guestCount,
-          amenities,
-          userId,
-          commentCount,
-        ]
-
+    city:
+      description: city schema
       properties:
-        id:
-          type: string
-          example: 6329c3d6a04ab1061c6425ef
+        name:
+          $ref: '#/components/schemas/cityName'
+        location:
+          $ref: '#/components/schemas/location'
 
-        title:
-          type: string
-          example: Modern Loft in Berlin
-
-        description:
-          type: string
-          example: Spacious loft with a great city view
-
-        image:
-          type: string
-          example: image3.jpg
-
-        date:
-          type: string
-          format: date
-          example: 2025-02-12
-
-        cost:
-          type: number
-          example: 180
-
-        town:
-          type: string
-          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-          example: Paris
-
-        gallery:
-          type: array
-          items:
-            type: string
-          example: [img5.jpg, img6.jpg]
-
-        isPremium:
-          type: boolean
-          example: true
-
-        isFavorite:
-          type: boolean
-          example: true
-
-        rating:
-          type: number
-          example: 4.5
-
-        apartmentType:
-          type: string
-          enum: [apartment, house, room, hotel]
-          example: apartment
-
-        roomCount:
-          type: integer
-          example: 4
-
-        guestCount:
-          type: integer
-          example: 4
-
-        amenities:
-          type: array
-          items:
-            type: string
-            enum:
-              [
-                Breakfast,
-                Air conditioning,
-                Laptop friendly workspace,
-                Baby seat,
-                Washer,
-                Towels,
-                Fridge,
-              ]
-            example: [Fridge, Breakfast, Washer]
-
-        userId:
-          type: string
-          example: 6329c3d6a04ab1061c6425eu
-
-        commentCount:
-          type: integer
-          example: 4
-
-    createComment:
-      type: object
-      required: [text, date, rating, author]
-
+    location:
+      description: location schema
       properties:
-        text:
-          type: string
-          example: Оч понравился. Ставлю 5 из 5.
-
-        date:
-          type: string
-          format: date
-          example: 2025-02-12
-
-        rating:
+        latitude:
           type: number
-          example: 5
-
-        author:
-          type: string
-          example: 6329c3d6a04ab1061c6425ea
-
-        offerId:
-          type: string
-          example: 6329c3d6a04ab1061c6425eo
-
-    comment:
-      type: object
-
-      properties:
-        id:
-          type: string
-          example: 6329c3d6a04ab1061c6425ec
-
-        text:
-          type: string
-          example: Оч понравился. Ставлю 5 из 5.
-
-        date:
-          type: string
-          format: date
-          example: 2025-02-12
-
-        rating:
+        longitude:
           type: number
-          example: 5
 
-        author:
-          type: string
-          example: 6329c3d6a04ab1061c6425ea
+    offerType:
+      description: offerType schema
+      type: string
+      enum:
+        - apartment
+        - room
+        - house
+        - hotel
 
-        offerId:
-          type: string
-          example: 6329c3d6a04ab1061c6425eo
+    userType:
+      description: userType schema
+      type: string
+      enum:
+        - pro
+        - regular
+
+    cityName:
+      description: cityName schema
+      type: string
+      enum:
+        - Paris
+        - Cologne
+        - Brussels
+        - Amsterdam
+        - Hamburg
+        - Dusseldorf
+
+    goods:
+      type: string
+      enum:
+        - Air conditioning
+        - Breakfast
+        - Baby seat
+        - Laptop friendly workspace
+        - Washer
+        - Towels
+        - Fridge

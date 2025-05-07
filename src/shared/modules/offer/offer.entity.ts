@@ -1,81 +1,119 @@
-import {
-  defaultClasses,
-  getModelForClass,
-  modelOptions,
-  prop,
-  Ref,
-} from '@typegoose/typegoose';
-import { TownType } from '../../types/town-type.enum.js';
-import { ApartmentType } from '../../types/index.js';
-import { Amenity } from '../../types/amenity.type.js';
-import { UserEntity } from '../user/user.entity.js';
+import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
+import { Good, HousingType, Location } from '../../types/index.js';
+import { UserEntity } from '../user/index.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface OfferEntity extends defaultClasses.Base {}
 
 @modelOptions({
   schemaOptions: {
-    collection: 'offers',
-  },
+    collection: 'offers'
+  }
 })
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class OfferEntity extends defaultClasses.TimeStamps {
-  @prop({ trim: true, required: true })
-  public title!: string;
-
-  @prop({ trim: true })
-  public description!: string;
-
-  @prop()
-  public image!: string;
-
-  @prop()
-  public date!: Date;
-
-  @prop()
-  public cost!: number;
-
   @prop({
-    type: () => String,
-    enum: TownType,
-  })
-  public town!: TownType;
-
-  @prop()
-  public gallery!: string[];
-
-  @prop()
-  public isPremium!: boolean;
-
-  @prop()
-  public isFavorite!: boolean;
-
-  @prop()
-  public rating!: number;
-
-  @prop({
-    type: () => String,
-    enum: ApartmentType,
-  })
-  public apartmentType!: ApartmentType;
-
-  @prop()
-  public roomCount!: number;
-
-  @prop()
-  public guestCount!: number;
-
-  @prop()
-  public amenities!: Amenity[];
-
-  @prop()
-  public commentCount!: number;
-
-  @prop({
-    ref: UserEntity,
+    trim: true,
     required: true,
+    type: () => String,
   })
-  public userId!: Ref<UserEntity>;
+  public title: string;
+
+  @prop({
+    trim: true,
+    required: true,
+    type: () => String,
+  })
+  public description: string;
+
+  // @prop({
+  //   required: true,
+  //   type: () => String,
+  //   enum: City
+  // })
+  // public city: City;
+
+  @prop({
+    required: true,
+    type: () => String,
+  })
+  public previewImage: string;
+
+  @prop({
+    required: true,
+    default: [],
+    type: () => Array<string>,
+  })
+  public images: string[];
+
+  @prop({
+    required: true,
+    type: () => Boolean,
+  })
+  public isPremium: boolean;
+
+  // @prop({
+  //   required: true,
+  //   type: () => Boolean,
+  // })
+  // public isFavorite: boolean;
+
+  // @prop({
+  //   required: true,
+  //   type: () => Number,
+  // })
+  // public rating: number;
+
+  @prop({
+    required: true,
+    type: () => String,
+    enum: HousingType
+  })
+  public type: HousingType;
+
+  @prop({
+    required: true,
+    type: () => Number,
+  })
+  public bedrooms: number;
+
+  @prop({
+    required: true,
+    type: () => Number,
+  })
+  public maxAdults: number;
+
+  @prop({
+    required: true,
+    type: () => Number,
+  })
+  public price: number;
+
+  @prop({
+    required: true,
+    type: () => Array<string>,
+  })
+  public goods: Good[];
+
+  @prop({
+    required: true,
+    ref: UserEntity,
+    type: () => String
+  })
+  public host: Ref<UserEntity>;
+
+  @prop({
+    type: () => Number,
+    default: 0
+  })
+  public commentCount: number;
+
+  @prop({
+    required: true,
+    type: () => Object,
+  })
+  public location: Location;
 }
 
 export const OfferModel = getModelForClass(OfferEntity);

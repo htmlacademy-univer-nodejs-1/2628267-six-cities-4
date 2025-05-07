@@ -1,2 +1,1 @@
-export const DEFAULT_COMMENT_LIMIT = 10;
-export const DEFAULT_COMMENT_MAX_LIMIT = 50;
+export const DEFAULT_LIMIT_COMMENTS = 50;
